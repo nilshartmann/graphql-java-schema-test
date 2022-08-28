@@ -16,7 +16,7 @@ public class GraphQLSchemaAssertions {
     SchemaParser schemaParser = new SchemaParser();
     InputStream schemaStream = GraphQLSchemaAssertions.class.getResourceAsStream(schemaLocationInClasspath);
     assertThat(schemaStream).as(String.format(
-      "SDL file not found. Please make sure, you have created the file '%s' in 'src/resources/graphql'", schemaLocationInClasspath)
+      "SDL file not found. Please make sure, you have created the file '%s' in 'src/resources/'", schemaLocationInClasspath)
     ).isNotNull();
 
     TypeDefinitionRegistry registry = schemaParser.parse(schemaStream);
@@ -188,38 +188,6 @@ public class GraphQLSchemaAssertions {
             .isNotNull();
 
           return inputValueDefinition;
-
-
-        }
-
-        private void assertNonNullableType(Type<?> type, String qualifiedName, String expectedType) {
-
-          assertThat(type)
-            .as(String.format("%s should be non-nullable, but is nullable!", qualifiedName))
-            .isInstanceOf(NonNullType.class);
-
-          NonNullType nonNullType = (NonNullType) type;
-
-          boolean shouldBeList = expectedType.matches("\\[.*]");
-          expectedType = shouldBeList ? expectedType.substring(1, expectedType.length() - 1) : expectedType;
-
-          if (shouldBeList) {
-            assertThat(nonNullType.getType())
-              .as(String.format("%s should be List/Array type", qualifiedName))
-              .isInstanceOf(ListType.class);
-
-            nonNullType = (NonNullType) ((ListType) nonNullType.getType()).getType();
-
-          } else {
-            assertThat(nonNullType.getType())
-              .as(String.format("%s should not be List/Array type", qualifiedName))
-              .isNotInstanceOf(ListType.class);
-          }
-
-          String fieldTypeName = ((TypeName) nonNullType.getType()).getName();
-          assertThat(fieldTypeName)
-            .as(String.format("%s has wrong type '%s'", typeDefinition.getName(), qualifiedName))
-            .isEqualTo(expectedType);
         }
       }
 
